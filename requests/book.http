@@ -1,0 +1,43 @@
+### List Books
+
+GET {{APP_URL}}/api/books
+Accept: application/json
+Authorization: Bearer 7|Lwcj9QmnNP8CWm0xBIiLjCiytPmfur6gFiDSz173e92d94e5
+
+HTTP/1.1 200 - OK
+
+### Create Book
+
+POST {{APP_URL}}/api/books
+Accept: application/json
+Authorization: Bearer 7|Lwcj9QmnNP8CWm0xBIiLjCiytPmfur6gFiDSz173e92d94e5
+Content-Type: application/json
+
+{
+    "title": "Foobar",
+    "pages": 20
+}
+
+HTTP/1.1 201 - Created
+
+### Update Book
+
+PATCH {{APP_URL}}/api/books/6
+Accept: application/json
+Authorization: Bearer 7|Lwcj9QmnNP8CWm0xBIiLjCiytPmfur6gFiDSz173e92d94e5
+Content-Type: application/json
+
+{
+    "pages": "14"
+}
+
+HTTP/1.1 200 - OK
+
+
+### Delete Book
+
+DELETE {{APP_URL}}/api/books/6
+Accept: application/json
+Authorization: Bearer 7|Lwcj9QmnNP8CWm0xBIiLjCiytPmfur6gFiDSz173e92d94e5
+
+HTTP/1.1 204 - No Content
