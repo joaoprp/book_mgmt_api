@@ -1,0 +1,41 @@
+### Login User
+# @name login
+POST {{APP_URL}}/api/login
+Accept: application/json
+Content-Type: application/json
+{
+  "email": "joe@example.com",
+  "password": "qwer1234"
+}
+
+HTTP/1.1 200 - OK
+
+### Get User
+
+GET {{APP_URL}}/api/user
+Accept: application/json
+
+HTTP/1.1 401 - Unauthorized
+
+
+### Get User
+
+GET {{APP_URL}}/api/user
+Accept: application/json
+Authorization: Bearer 7|Lwcj9QmnNP8CWm0xBIiLjCiytPmfur6gFiDSz173e92d94e5
+
+HTTP/1.1 200 - OK
+
+### Register User
+
+POST {{APP_URL}}/api/register
+Accept: application/json
+Content-Type: application/json
+{
+  "name": "Joe",
+  "email": "joe@example.com",
+  "password": "qwer1234",
+  "password_confirmation": "qwer1234"
+}
+
+HTTP/1.1 201 - Created
