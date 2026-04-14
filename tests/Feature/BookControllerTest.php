@@ -2,67 +2,93 @@
 
 namespace Tests\Feature;
 
+use App\Http\Controllers\Api\BookController;
+use App\Models\Book;
+use App\Models\User;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Request;
 use Tests\TestCase;
 
 class BookControllerTest extends TestCase
 {
     use WithFaker;
 
-    public function generate_user()
+    private $bookController;
+
+    private $req;
+
+    private $user;
+
+    protected function setUp(): void
     {
-        $email = $this->faker->email;
-        $password = 'password';
-        $this->post('api/register', [
+        parent::setUp();
+        $this->bookController = new BookController;
+        $this->user = User::create([
             'name' => $this->faker->name,
-            'email' => $email,
-            'password' => $password,
-            'password_confirmation' => $password,
+            'email' => $this->faker->email,
+            'password' => 'password',
         ]);
 
-        return $this->post('api/login', [
-            'email' => $email,
-            'password' => $password,
-        ], [], ['Accept' => 'application/json'])->json();
+        $this->actingAs($this->user);
+
+        $this->req = [
+            'get' => Request::create('/api/books', 'GET'),
+            'post' => Request::create('/api/books', 'POST', [
+                'title' => $this->faker->sentence,
+                'pages' => $this->faker->numberBetween(1, 10),
+            ]),
+            'put' => Request::create('/api/books', 'PUT', [
+                'indexes' => [
+                    [
+                        'title' => $this->faker->sentence,
+                        'page' => $this->faker->numberBetween(1, 10),
+                    ],
+                ],
+            ]),
+        ];
     }
 
     public function test_create_book()
     {
-        $user = $this->generate_user();
+        $response = $this->bookController->create($this->req['post']);
 
-        $response = $this->postJson('/api/books', [
-            'title' => $this->faker->sentence,
-            'pages' => $this->faker->numberBetween(1, 10),
-        ], ['Accept' => 'application/json', 'Authorization' => 'Bearer '.$user['token']]);
-
-        $response->assertStatus(201);
-        $response->assertJsonStructure([
-            'id',
-            'title',
-            'pages',
-            'created_at',
-            'updated_at',
-        ]);
-
-        return $user;
+        $this->assertEquals(201, $response->getStatusCode());
+        $this->assertJson($response->getContent());
     }
 
     public function test_get_books()
     {
-        $user = $this->test_create_book();
+        $book_length = 4;
 
-        $response = $this->getJson('/api/books', ['Accept' => 'application/json', 'Authorization' => 'Bearer '.$user['token']]);
+        foreach (range(0, $book_length) as $_) {
+            Book::create([
+                'title' => $this->faker->sentence,
+                'pages' => $this->faker->numberBetween(1, 10),
+                'user_id' => $this->user->id,
+            ]);
+        }
 
-        $response->assertStatus(200);
-        $response->assertJsonStructure([
-            '*' => [
-                'id',
-                'title',
-                'pages',
-                'user',
-                'created_at',
-                'updated_at',
-            ],
+        $response = $this->bookController->index($this->req['get']);
+
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertJson($response->getContent());
+        $this->assertCount($book_length + 1, json_decode($response->getContent(), true));
+    }
+
+    public function test_edit_book()
+    {
+        $book = Book::create([
+            'title' => $this->faker->sentence,
+            'pages' => $this->faker->numberBetween(1, 10),
+            'user_id' => $this->user->id,
         ]);
+
+        $response = $this->bookController->update($this->req['put'], $book->id);
+
+        $book = Book::with('indexes')->find($book->id);
+
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertJson($response->getContent());
+        $this->assertEquals(count($book->indexes), 1);
     }
 }

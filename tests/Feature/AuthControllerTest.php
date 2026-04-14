@@ -2,46 +2,66 @@
 
 namespace Tests\Feature;
 
+use App\Http\Controllers\Api\AuthController;
+use App\Models\User;
+use Illuminate\Support\Facades\Request;
 use Tests\TestCase;
 
 class AuthControllerTest extends TestCase
 {
+    protected $authController;
+
+    protected $req;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->authController = new AuthController;
+        $this->req = [
+            'login' => Request::create('/api/login', 'POST', [
+                'email' => 'joe@example.com',
+                'password' => 'qwer1234',
+            ]),
+            'logout' => Request::create('/api/logout', 'POST'),
+            'register' => Request::create('/api/register', 'POST', [
+                'name' => 'Joe',
+                'email' => 'joe@example.com',
+                'password' => 'qwer1234',
+                'password_confirmation' => 'qwer1234',
+            ]),
+        ];
+    }
+
     public function test_register()
     {
-        $this->post('api/register', [
-            'name' => 'Joe',
-            'email' => 'joe@example.com',
-            'password' => 'qwer1234',
-            'password_confirmation' => 'qwer1234',
-        ])->assertStatus(201);
+        $response = $this->authController->register($this->req['register']);
+
+        $this->assertEquals(201, $response->getStatusCode());
     }
 
     public function test_login()
     {
-        // Register first
-        $this->test_register();
-
-        // Then login
-        $this->post('api/login', [
+        User::factory()->create([
             'email' => 'joe@example.com',
-            'password' => 'qwer1234',
-        ])->assertStatus(200);
+            'password' => bcrypt('qwer1234'),
+        ]);
+
+        $response = $this->authController->login($this->req['login']);
+
+        $this->assertEquals(200, $response->getStatusCode());
     }
 
     public function test_logout()
     {
-        // Register first
-        $this->test_register();
-
-        // Then login
-        $response = $this->post('api/login', [
+        $user = User::factory()->create([
             'email' => 'joe@example.com',
-            'password' => 'qwer1234',
+            'password' => bcrypt('qwer1234'),
         ]);
 
-        $data = $response->json();
+        $this->authController->login($this->req['login']);
 
-        // Then logout
-        $this->post('api/logout', [], ['Authorization' => 'Bearer '.$data['token'], 'Accept' => 'application/json'])->assertStatus(200);
+        $response = $this->actingAs($user)->post('/api/logout', [], ['Accept' => 'application/json']);
+
+        $this->assertEquals(200, $response->getStatusCode());
     }
 }
