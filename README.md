@@ -1,21 +1,29 @@
 # Book Management API
 
-Description TBA
+API que simula uma biblioteca virtual
 
-## Setting up
+## Decisões e definições
 
-We need as dependency: 
+Originalmente eu tinha um plano de execução no desenvolvimento da API:
 
-- PHP 8.4+
-- PostgreSQL
+1. Scaffolding + Autenticação
+2. Livros
+3. Índices
 
-To set the application up, we need to expect the base set up from php + composer [from here](https://laravel.com/docs/13.x/installation#installing-php), plus installing Postgres. As Postgres installation may vary based on OS, I'm skipping those instructions until I get to the docker setting up phase further down the project
+Levando em consideração apenas o básico necessário, CRUDs, alguns poucos filtros e testes adicionais. Após esses passos, teríamos:
 
-## Running the application
+1. Cleanup do Laravel
+2. Config de Dockerfile + composer.yml
+3. Organização de corner cases adicionais
 
-Once php, composer and postgres are set, you'll need to run migrations with `php artisan migrate`, and then you can run `php artisan serve`.
+Afinal de contas, PHP/Laravel é uma linguagem/framework que eu possuo experiência, apesar de recentemente não estar usando.
 
-## Running endpoints
+Todos os endpoints foram criados, alguns testes foram feitos, mas com a falta de tempo por conta do meu cachorro, me fez ter que tomar algumas decisões em relação a continuidade do projeto de forma efetiva.
 
-In this initial commit, we're expecting that API requests do send a header `Accept: application/json` for proper routing. This will be addressed in future commits
-There's a folder called `requests` that implements httpYac support to run endpoints, as well as JetBrains IDEs that are able to internally run `.http` files to run and test requests
+Foram cortados a criação de um Dockerfile, e o projeto depende de ser instanciado manualmente com o `composer run dev` e ter o postgres instalado localmente ou no docker, com o .env devidamente atualizado.
+
+Os requests `.http` pra rodar endpoints direto na IDE não foram concluídos, mas como tem cobertura de teste em todos os controllers, é ok.
+
+## Pontos adicionais
+
+Laravel ainda continua praticamente o mesmo, com algumas melhorias e integrações, como o sanctum de middleware de autenticação, facilita bastante o processo de iniciar e gerenciar projetos.
